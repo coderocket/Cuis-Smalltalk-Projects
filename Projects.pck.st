@@ -1,18 +1,8 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3397] on 11 October 2018 at 5:58:34 pm'!
-'Description Create hierarchical projects similar to those in the original Smalltalk-80 system. '!
-!provides: 'Projects' 1 3!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 16 October 2018 at 2:21:59 pm'!
+'Description Please enter a description for this package'!
+!provides: 'Projects' 1 0!
 SystemOrganization addCategory: #Projects!
 
-
-!classDefinition: #ScalableImageMorph category: #Projects!
-ImageMorph subclass: #ScalableImageMorph
-	instanceVariableNames: 'scaledImage originalImage'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Projects'!
-!classDefinition: 'ScalableImageMorph class' category: #Projects!
-ScalableImageMorph class
-	instanceVariableNames: ''!
 
 !classDefinition: #ProjectMorph category: #Projects!
 PluggableMorph subclass: #ProjectMorph
@@ -22,6 +12,16 @@ PluggableMorph subclass: #ProjectMorph
 	category: 'Projects'!
 !classDefinition: 'ProjectMorph class' category: #Projects!
 ProjectMorph class
+	instanceVariableNames: ''!
+
+!classDefinition: #ScalableImageMorph category: #Projects!
+ImageMorph subclass: #ScalableImageMorph
+	instanceVariableNames: 'scaledImage originalImage'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Projects'!
+!classDefinition: 'ScalableImageMorph class' category: #Projects!
+ScalableImageMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #Project category: #Projects!
@@ -34,26 +34,6 @@ Object subclass: #Project
 Project class
 	instanceVariableNames: 'transcript'!
 
-
-!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 17:14:38'!
-image: anImage 
-	originalImage _ anImage.
-	super image: anImage.
-! !
-
-!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 14:46:47'!
-minimumExtent
-	^0@0! !
-
-!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 17:18:10'!
-morphExtent: aPoint
-	extent _ aPoint. 
-	self someSubmorphPositionOrExtentChanged! !
-
-!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 17:09:36'!
-someSubmorphPositionOrExtentChanged
-		image _ originalImage magnifyTo: extent.
-! !
 
 !ProjectMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 16:01:18'!
 handlesMouseDown: aMouseButtonEvent
@@ -100,7 +80,7 @@ someSubmorphPositionOrExtentChanged
 update
 	aScalableImageMorph image: model thumbnail.! !
 
-!ProjectMorph class methodsFor: 'as yet unclassified' stamp: 'DF 10/8/2018 15:06:48'!
+!ProjectMorph class methodsFor: 'instance creation' stamp: 'DF 10/16/2018 10:45:45'!
 open
 
 	| aProject aProjectMorph |
@@ -109,7 +89,58 @@ open
 	aProjectMorph _ ProjectMorph new.
 	aProjectMorph model: aProject.
 	
-	^(aProjectMorph embeddedInMorphicWindowLabeled: 'Unnamed') openInWorld
+	^(aProjectMorph embeddedInMorphicWindowLabeled: 'Unnamed') openInWorld morphExtent:300@200
+! !
+
+!ProjectMorph class methodsFor: 'menu-world' stamp: 'DF 10/16/2018 10:37:21'!
+worldMenuForOpenGroup
+	^ `{{
+			#itemGroup 		-> 		15.
+			#itemOrder 		-> 		10.
+			#label 			->			'Project'.
+			#object 			-> 		ProjectMorph.
+			#selector 		-> 		#open.
+			#balloonText 	-> 		'Create a new unnamed project'.
+		} asDictionary}`! !
+
+!ProjectMorph class methodsFor: 'menu-world' stamp: 'DF 10/16/2018 14:17:36'!
+worldMenuOptions
+^`{{
+		#itemGroup 		-> 		15.
+		#itemOrder 		-> 		10.
+		#label 			-> 		'Previous Project'.
+		#object             ->             ProjectMorph.
+		#selector 		-> 		#previousProject.
+		#balloonText 	-> 		'Close this project and go back to its parent'.
+	} asDictionary.
+}`! !
+
+!ProjectMorph class methodsFor: 'project navigation' stamp: 'DF 10/16/2018 14:18:46'!
+previousProject
+	| parent |
+	
+	parent _ Project current parent.
+	
+	parent ifNotNil:[parent enter].! !
+
+!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 17:14:38'!
+image: anImage 
+	originalImage _ anImage.
+	super image: anImage.
+! !
+
+!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 14:46:47'!
+minimumExtent
+	^0@0! !
+
+!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 17:18:10'!
+morphExtent: aPoint
+	extent _ aPoint. 
+	self someSubmorphPositionOrExtentChanged! !
+
+!ScalableImageMorph methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 17:09:36'!
+someSubmorphPositionOrExtentChanged
+		image _ originalImage magnifyTo: extent.
 ! !
 
 !Project methodsFor: 'as yet unclassified' stamp: 'DF 8/8/2018 16:15:18'!
@@ -155,18 +186,4 @@ current
 !Project class methodsFor: 'as yet unclassified' stamp: 'DF 10/11/2018 17:58:21'!
 initialize
 	CurrentProject _ Project new! !
-
-!TheWorldMenu methodsFor: '*Projects' stamp: 'DF 10/8/2018 15:08:27'!
-newProject
-	ProjectMorph open morphExtent:300@200! !
-
-!TheWorldMenu methodsFor: '*Projects' stamp: 'DF 8/8/2018 17:46:02'!
-previousProject
-
-	| previousProject | 
-	
-	previousProject _ Project current parent.
-	
-	previousProject 
-		ifNotNil:[ previousProject enter]! !
 Project initialize!
